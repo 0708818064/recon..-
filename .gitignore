@@ -1,0 +1,38 @@
+# Python Virtual Environments
+venv/
+reconquest/venv/
+.env
+.venv/
+env/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+reconquest/__pycache__/
+*/__pycache__/
+
+# Database & Runtime Instance
+reconquest/instance/
+instance/
+*.db
+*.sqlite3
+
+# Logs & Captures
+*.log
+instance/logs/
+hs/
+reconquest/hs/
+*.cap
+*.pcap
+
+# Temporary & Editor lock files
+.~lock.*
+*.tmp
+*.swp
+*~
+
+# Test & IDE Caches
+.pytest_cache/
+.vscode/
+.idea/

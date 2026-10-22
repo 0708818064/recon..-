@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}RECONQUEST - Wi-Fi Security Lab{% endblock %}
+{% block page_title %}Module B: Wi-Fi Security Lab{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+    <div>
+        <div style="font-family: var(--font-mono); color: var(--cyan); font-size: 13px; letter-spacing: 2px;">
+            MODULE B // 802.11 WIRELESS SECURITY TESTING
+        </div>
+        <h1 style="font-size: 28px; font-weight: 700; color: var(--text-main); margin-top: 5px;">
+            WI-FI SECURITY TESTING LAB
+        </h1>
+    </div>
+    <a href="{{ url_for('routes.dashboard') }}" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> [11] RETURN TO MAIN MENU
+    </a>
+</div>
+
+<!-- Wi-Fi Submenu Buttons -->
+<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 25px;">
+    <button class="btn btn-secondary wifi-tab active" data-sub="diag">[1] Adapter Diagnostics</button>
+    <button class="btn btn-secondary wifi-tab" data-sub="discovery">[2] Network Discovery</button>
+    <button class="btn btn-secondary wifi-tab" data-sub="assessment">[3] Security Assessment</button>
+    <button class="btn btn-secondary wifi-tab" data-sub="airgeddon">[4] Airgeddon Launcher</button>
+    <button class="btn btn-secondary wifi-tab" data-sub="wifite">[5] Wifite Launcher</button>
+    <button class="btn btn-secondary wifi-tab" data-sub="capture">[9] Capture Analysis</button>
+    <a href="{{ url_for('routes.tool_manager') }}" class="btn btn-secondary">[10] Wi-Fi Tool Center</a>
+</div>
+
+<!-- Section 1: Wireless Adapter Diagnostics -->
+<div id="sectionDiag" class="wifi-section">
+    <div class="cyber-card" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="color: var(--text-main); font-size: 20px;">
+                <i class="fa-solid fa-microchip" style="color: var(--cyan);"></i> WIRELESS ADAPTER & DRIVER DIAGNOSTICS [1]
+            </h3>
+            <button class="btn btn-primary" onclick="loadAdapterDiagnostics()">
+                <i class="fa-solid fa-rotate"></i> RUN DIAGNOSTICS
+            </button>
+        </div>
+        <p style="color: var(--text-muted); font-size: 14px;">
+            Inspects physical 802.11 hardware interfaces, kernel drivers, monitor-mode packet injection capabilities, and rfkill software/hardware switches.
+        </p>
+
+        <div id="diagResults" style="margin-top: 20px;">
+            <div style="color: var(--text-muted); font-family: var(--font-mono);">Click "RUN DIAGNOSTICS" to inspect system wireless interfaces.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Wireless Network Discovery -->
+<div id="sectionDiscovery" class="wifi-section" style="display: none;">
+    <div class="cyber-card" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="color: var(--text-main); font-size: 20px;">
+                <i class="fa-solid fa-broadcast-tower" style="color: var(--neon-green);"></i> AIRSPACE BEACON DISCOVERY [2]
+            </h3>
+            <button class="btn btn-primary" onclick="startNetworkDiscovery()">
+                <i class="fa-solid fa-satellite-dish"></i> SCAN AIRSPACE
+            </button>
+        </div>
+        <p style="color: var(--text-muted); font-size: 14px;">
+            Passively scans visible 802.11 beacon frames to catalog reachable SSIDs, BSSIDs, broadcast channels, signal strength, and advertised security encryption (WPA2, WPA3, OWE, WEP).
+        </p>
+        <div class="terminal-card" style="margin-top: 15px;">
+            <div class="terminal-header">
+                <span class="terminal-title">BEACON OBSERVATION STREAM</span>
+            </div>
+            <pre class="terminal-body" id="wifiTerminal">[*] Ready. Click "SCAN AIRSPACE" to observe local wireless broadcasts.</pre>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: Wireless Security Assessment (Educational) -->
+<div id="sectionAssessment" class="wifi-section" style="display: none;">
+    <div class="cyber-card" style="margin-bottom: 20px;">
+        <h3 style="color: var(--text-main); font-size: 20px; margin-bottom: 15px;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--purple);"></i> WIRELESS SECURITY CHECKS & REMEDIATION [3]
+        </h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+            Security checklists for evaluating authorized lab router and access point hardening.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 18px; border-radius: 6px; border-left: 3px solid var(--neon-green);">
+                <h4 style="color: var(--neon-green); margin-bottom: 6px;">WPA3 SAE vs WPA2-PSK</h4>
+                <p style="font-size: 13px; color: var(--text-muted);">
+                    WPA3 Simultaneous Authentication of Equals (SAE) provides forward secrecy and protects against offline dictionary attacks even with simpler passwords.
+                </p>
+            </div>
+            <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 18px; border-radius: 6px; border-left: 3px solid var(--amber);">
+                <h4 style="color: var(--amber); margin-bottom: 6px;">Wi-Fi Protected Setup (WPS) Risk</h4>
+                <p style="font-size: 13px; color: var(--text-muted);">
+                    WPS PIN brute force (Reaver / Bully) allows offline determination of the router PIN. Disable WPS in router management settings.
+                </p>
+            </div>
+            <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 18px; border-radius: 6px; border-left: 3px solid var(--cyan);">
+                <h4 style="color: var(--cyan); margin-bottom: 6px;">Client & Guest Isolation</h4>
+                <p style="font-size: 13px; color: var(--text-muted);">
+                    Enable Wireless Client Isolation (AP Isolation) to prevent devices on the same Wi-Fi network from intercepting peer traffic or pivoting laterally.
+                </p>
+            </div>
+            <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 18px; border-radius: 6px; border-left: 3px solid var(--crimson);">
+                <h4 style="color: var(--crimson); margin-bottom: 6px;">Rogue AP & Evil Twin Defense</h4>
+                <p style="font-size: 13px; color: var(--text-muted);">
+                    Use 802.1X Enterprise authentication with validated CA certificates so client devices verify the authentic RADIUS server before transmitting credentials.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 4: Airgeddon Interactive Launcher -->
+<div id="sectionAirgeddon" class="wifi-section" style="display: none;">
+    <div class="cyber-card">
+        <h3 style="color: var(--text-main); font-size: 20px; margin-bottom: 10px;">
+            <i class="fa-solid fa-terminal" style="color: var(--crimson);"></i> AIRGEDDON WIRELESS AUDITING FRAMEWORK [4]
+        </h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+            Airgeddon is an interactive, multi-use bash framework. Because it requires terminal menus, color prompts, and direct user keystrokes, RECONQUEST launches it in an authorized local Ubuntu terminal emulator.
+        </p>
+
+        <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 18px; border-radius: 6px; margin-bottom: 20px;">
+            <div style="font-family: var(--font-mono); font-size: 13px; color: var(--cyan); margin-bottom: 8px;">SECURITY & PERMISSION ARCHITECTURE</div>
+            <ul style="color: var(--text-muted); font-size: 13px; padding-left: 20px; line-height: 1.8;">
+                <li>The web application does <strong>NOT</strong> ask for your root password.</li>
+                <li>Your native Ubuntu terminal window will prompt for sudo authentication directly.</li>
+                <li>Ensure you have configured an authorized wireless adapter capable of monitor mode.</li>
+            </ul>
+        </div>
+
+        <button class="btn btn-primary" onclick="launchTerminalApp('airgeddon')">
+            <i class="fa-solid fa-window-maximize"></i> LAUNCH AIRGEDDON IN TERMINAL
+        </button>
+    </div>
+</div>
+
+<!-- Section 5: Wifite Launcher -->
+<div id="sectionWifite" class="wifi-section" style="display: none;">
+    <div class="cyber-card">
+        <h3 style="color: var(--text-main); font-size: 20px; margin-bottom: 10px;">
+            <i class="fa-solid fa-terminal" style="color: var(--cyan);"></i> WIFITE2 AUTOMATED WIRELESS AUDITOR [5]
+        </h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+            Wifite is an automated wireless audit tool designed for authorized penetration testing. Launches in a controlled terminal session.
+        </p>
+
+        <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 18px; border-radius: 6px; margin-bottom: 20px;">
+            <div style="font-family: var(--font-mono); font-size: 13px; color: var(--amber); margin-bottom: 8px;">AUTHORIZATION NOTICE</div>
+            <p style="font-size: 13px; color: var(--text-muted);">
+                Attacking third-party or nearby unauthorized wireless networks is illegal. Use Wifite strictly within an isolated wireless test lab.
+            </p>
+        </div>
+
+        <button class="btn btn-cyan" onclick="launchTerminalApp('wifite')">
+            <i class="fa-solid fa-window-maximize"></i> LAUNCH WIFITE IN TERMINAL
+        </button>
+    </div>
+</div>
+
+<!-- Section 6: Capture File Analysis -->
+<div id="sectionCapture" class="wifi-section" style="display: none;">
+    <div class="cyber-card">
+        <h3 style="color: var(--text-main); font-size: 20px; margin-bottom: 15px;">
+            <i class="fa-solid fa-file-waveform" style="color: var(--neon-green);"></i> WIRELESS CAPTURE ANALYSIS (.CAP / .PCAP) [9]
+        </h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+            Inspect captured 802.11 packets, check for EAPOL 4-way handshakes, and view dissection summaries using Aircrack-ng and TShark.
+        </p>
+
+        <div class="form-group" style="max-width: 600px;">
+            <label class="form-label">Path to .cap or .pcap file on Ubuntu host</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="capFilePath" class="form-control" placeholder="/path/to/authorized_capture.cap">
+                <button class="btn btn-primary" onclick="inspectCaptureFile()">INSPECT</button>
+            </div>
+        </div>
+
+        <div id="captureResults" style="margin-top: 20px;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Wi-Fi tabs switcher
+document.querySelectorAll('.wifi-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.wifi-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const sub = btn.getAttribute('data-sub');
+        document.querySelectorAll('.wifi-section').forEach(sec => sec.style.display = 'none');
+
+        if (sub === 'diag') document.getElementById('sectionDiag').style.display = 'block';
+        if (sub === 'discovery') document.getElementById('sectionDiscovery').style.display = 'block';
+        if (sub === 'assessment') document.getElementById('sectionAssessment').style.display = 'block';
+        if (sub === 'airgeddon') document.getElementById('sectionAirgeddon').style.display = 'block';
+        if (sub === 'wifite') document.getElementById('sectionWifite').style.display = 'block';
+        if (sub === 'capture') document.getElementById('sectionCapture').style.display = 'block';
+    });
+});
+
+async function loadAdapterDiagnostics() {
+    const container = document.getElementById('diagResults');
+    container.innerHTML = "<div style='color: var(--cyan); font-family: var(--font-mono);'><i class='fa-solid fa-circle-notch fa-spin'></i> Querying kernel wireless interfaces...</div>";
+
+    const res = await ReconQuest.apiCall('/api/wifi/diagnostics');
+    if (res.success) {
+        const diag = res.data;
+        let html = `
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 15px; border-radius: 6px;">
+                    <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">WIRELESS INTERFACES</div>
+                    <div style="font-size: 20px; font-weight: bold; color: var(--text-main);">${diag.interfaces.length} DETECTED</div>
+                </div>
+                <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 15px; border-radius: 6px;">
+                    <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">MONITOR MODE SUPPORT</div>
+                    <div style="font-size: 20px; font-weight: bold; color: ${diag.has_monitor_support ? 'var(--neon-green)' : 'var(--amber)'};">
+                        ${diag.has_monitor_support ? 'SUPPORTED' : 'UNVERIFIED / ABSENT'}
+                    </div>
+                </div>
+                <div style="background: var(--bg-card-sub); border: 1px solid var(--border-color); padding: 15px; border-radius: 6px;">
+                    <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">RFKILL STATUS</div>
+                    <div style="font-size: 20px; font-weight: bold; color: var(--text-main);">
+                        ${diag.rfkill_blocks.length} RADIO DEVICES
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (diag.interfaces.length > 0) {
+            html += `<table class="cyber-table">
+                <thead>
+                    <tr><th>Interface</th><th>Mode</th><th>MAC Address</th><th>Channel/Freq</th><th>Monitor Capable</th></tr>
+                </thead>
+                <tbody>`;
+            diag.interfaces.forEach(iface => {
+                html += `<tr>
+                    <td><strong>${iface.name}</strong></td>
+                    <td><code>${iface.type}</code></td>
+                    <td><code>${iface.addr}</code></td>
+                    <td>${iface.channel}</td>
+                    <td>${iface.supports_monitor ? '<span class="badge badge-ready">YES</span>' : '<span class="badge badge-missing">NO / UNCONFIRMED</span>'}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+        } else {
+            html += `<div style="background: var(--bg-card-sub); border: 1px dashed var(--border-color); padding: 20px; text-align: center; border-radius: 6px; color: var(--text-muted);">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 24px; color: var(--amber); margin-bottom: 10px;"></i>
+                <p>No physical 802.11 wireless interfaces detected. If you are running in a virtual machine, attach a USB Wi-Fi adapter (e.g. Atheros AR9271 or Realtek RTL8812AU) to pass through to Linux.</p>
+            </div>`;
+        }
+
+        container.innerHTML = html;
+        ReconQuest.showToast("Diagnostics complete", "success");
+    } else {
+        container.innerHTML = `<div style="color: var(--crimson);">Failed to run diagnostics: ${res.error}</div>`;
+    }
+}
+
+async function startNetworkDiscovery() {
+    ReconQuest.showToast("Observing wireless beacon frames...", "info");
+    const res = await ReconQuest.apiCall('/api/wifi/discover', { method: 'POST' });
+    if (res.success) {
+        ReconQuest.startScanMonitoring(res.job_id, 'wifiTerminal');
+    } else {
+        ReconQuest.showToast(res.error, "error");
+    }
+}
+
+async function launchTerminalApp(toolName) {
+    ReconQuest.showModal(
+        `LAUNCH ${toolName.toUpperCase()} CONFIRMATION`,
+        `<p style="margin-bottom: 12px; color: var(--text-muted);">
+            This will spawn a native Ubuntu terminal window executing <strong>sudo ${toolName}</strong>.
+            Your local terminal will prompt for administrative authentication.
+        </p>
+        <p style="font-size: 13px; color: var(--amber);">
+            Please confirm you are testing authorized equipment.
+        </p>`,
+        async () => {
+            ReconQuest.showToast(`Launching ${toolName} in local terminal...`, "info");
+            const res = await ReconQuest.apiCall('/api/wifi/launch_terminal', {
+                method: 'POST',
+                body: JSON.stringify({ tool: toolName })
+            });
+            if (res.success) {
+                ReconQuest.showToast(res.message, "success");
+            } else {
+                ReconQuest.showToast(res.error, "error");
+            }
+        }
+    );
+}
+
+async function inspectCaptureFile() {
+    const path = document.getElementById('capFilePath').value.trim();
+    if (!path) {
+        ReconQuest.showToast("Provide a path to a capture file", "warning");
+        return;
+    }
+    const container = document.getElementById('captureResults');
+    container.innerHTML = "<div style='color: var(--cyan);'>Inspecting packet capture...</div>";
+
+    const res = await ReconQuest.apiCall('/api/wifi/inspect_capture', {
+        method: 'POST',
+        body: JSON.stringify({ filepath: path })
+    });
+    if (res.success) {
+        const d = res.data;
+        container.innerHTML = `
+            <div style="background: #000; padding: 15px; border-radius: 6px; font-family: var(--font-mono); font-size: 13px; color: var(--neon-green);">
+                <div style="color: var(--cyan); margin-bottom: 10px;">[Aircrack-ng Handshake Verification]</div>
+                <pre>${d.aircrack_inspection || 'No output.'}</pre>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `<div style="color: var(--crimson);">${res.error}</div>`;
+    }
+}
+</script>
+{% endblock %}

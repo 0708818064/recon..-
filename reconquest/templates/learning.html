@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}RECONQUEST - Learning Center{% endblock %}
+{% block page_title %}Learning Academy & Missions{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+    <div>
+        <div style="font-family: var(--font-mono); color: var(--neon-green); font-size: 13px; letter-spacing: 2px;">
+            ACADEMY // HANDS-ON MISSIONS
+        </div>
+        <h1 style="font-size: 28px; font-weight: 700; color: var(--text-main); margin-top: 5px;">
+            CYBERSECURITY LEARNING MISSIONS
+        </h1>
+        <p style="color: var(--text-muted); font-size: 14px; max-width: 800px; margin-top: 6px;">
+            Complete real hands-on reconnaissance missions to earn Operator Experience Points (XP), level up, and unlock mastery badges.
+        </p>
+    </div>
+    <a href="{{ url_for('routes.dashboard') }}" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> [0] DASHBOARD
+    </a>
+</div>
+
+<!-- Missions Grid -->
+<div class="grid-cards">
+    {% for mission in missions %}
+    <div class="cyber-card">
+        <div class="card-num">+{{ mission.xp_reward }} XP</div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green);">
+                {{ mission.difficulty.upper() }}
+            </span>
+            <span style="font-family: var(--font-mono); font-size: 12px; color: var(--cyan); text-transform: uppercase;">
+                {{ mission.category }}
+            </span>
+        </div>
+        <div class="card-title">{{ mission.name }}</div>
+        <div class="card-desc">{{ mission.description }}</div>
+
+        <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid var(--border-color);">
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--cyan); margin-bottom: 6px;">TACTICAL OBJECTIVES:</div>
+            <ol style="font-size: 12px; color: var(--text-muted); padding-left: 20px; line-height: 1.6;">
+                {% for step in mission.get_steps() %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+
+        {% if mission.hints %}
+        <div style="font-size: 12px; color: var(--amber); margin-bottom: 15px; font-style: italic;">
+            <i class="fa-solid fa-lightbulb"></i> Tip: {{ mission.hints }}
+        </div>
+        {% endif %}
+
+        <div style="margin-top: auto;">
+            {% if mission.category == 'web_recon' %}
+                <a href="{{ url_for('routes.web_recon') }}" class="btn btn-primary" style="width: 100%;">
+                    LAUNCH MISSION LAB &rarr;
+                </a>
+            {% else %}
+                <a href="{{ url_for('routes.wifi_security') }}" class="btn btn-cyan" style="width: 100%;">
+                    OPEN WIRELESS LAB &rarr;
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}RECONQUEST - Web Reconnaissance{% endblock %}
+{% block page_title %}Module A: Web Reconnaissance{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+    <div>
+        <div style="font-family: var(--font-mono); color: var(--cyan); font-size: 13px; letter-spacing: 2px;">
+            MODULE A // TARGET SURFACE RECONNAISSANCE
+        </div>
+        <h1 style="font-size: 28px; font-weight: 700; color: var(--text-main); margin-top: 5px;">
+            WEB RECONNAISSANCE OPERATIONS
+        </h1>
+    </div>
+    <a href="{{ url_for('routes.dashboard') }}" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> [12] RETURN TO MAIN MENU
+    </a>
+</div>
+
+<!-- Submenu Navigation Pills -->
+<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 25px;">
+    <button class="btn btn-secondary sub-tab active" data-sub="subdomain">[2] Subdomain Discovery</button>
+    <button class="btn btn-secondary sub-tab" data-sub="dns">[3] DNS Intelligence</button>
+    <button class="btn btn-secondary sub-tab" data-sub="httpx">[4] Live Host Discovery</button>
+    <button class="btn btn-secondary sub-tab" data-sub="nmap">[5] Port & Service Scan</button>
+    <button class="btn btn-secondary sub-tab" data-sub="crawler">[7] URL & Endpoints</button>
+    <button class="btn btn-secondary sub-tab" data-sub="nuclei">[10] Vulnerability Scan</button>
+</div>
+
+<!-- Interactive Scan Execution Panel -->
+<div class="cyber-card" style="margin-bottom: 25px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+        <div>
+            <h3 style="color: var(--text-main); font-size: 20px;" id="reconSectionTitle">SUBDOMAIN DISCOVERY MISSION</h3>
+            <p style="color: var(--text-muted); font-size: 14px;" id="reconSectionDesc">
+                Passively enumerate subdomains across public sources without directly touching the target server.
+            </p>
+        </div>
+        <div id="selectedToolBadge">
+            <span class="badge badge-ready"><i class="fa-solid fa-check"></i> READY</span>
+        </div>
+    </div>
+
+    <form id="reconForm" onsubmit="event.preventDefault(); executeSelectedRecon();">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+            <div class="form-group">
+                <label class="form-label">Target Domain or Hostname (Must be in authorized scope)</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="targetInput" class="form-control" placeholder="e.g. scanme.nmap.org" required>
+                    <button type="button" class="btn btn-secondary" onclick="checkScopeQuick()" title="Check Scope">
+                        <i class="fa-solid fa-shield-check"></i> Verify Scope
+                    </button>
+                </div>
+                <div id="scopeFeedback" style="font-family: var(--font-mono); font-size: 12px; margin-top: 6px;"></div>
+            </div>
+
+            <div class="form-group" id="toolSelectGroup">
+                <label class="form-label">Cybersecurity Engine</label>
+                <select id="toolSelect" class="form-control" onchange="updateToolReadiness()">
+                    <option value="subfinder">Subfinder (Passive Fast Enumerator)</option>
+                    <option value="amass">OWASP Amass (Deep DNS Architecture)</option>
+                    <option value="assetfinder">Assetfinder (Fast Passive Archive)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Dynamic Options based on tab -->
+        <div id="dynamicOptions" style="margin-bottom: 15px;">
+            <!-- Injected depending on tab (Nmap ports, Nuclei severity, etc.) -->
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="previewCommand()">
+                <i class="fa-solid fa-code"></i> Preview Command
+            </button>
+            <button type="submit" class="btn btn-primary" id="launchBtn">
+                <i class="fa-solid fa-bolt"></i> EXECUTE RECONNAISSANCE
+            </button>
+            <button type="button" class="btn btn-danger" onclick="ReconQuest.cancelActiveScan()" id="cancelBtn" style="display: none;">
+                <i class="fa-solid fa-stop"></i> STOP OPERATION
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Real-time Live Terminal Output Screen -->
+<div class="terminal-card">
+    <div class="terminal-header">
+        <div class="terminal-title">
+            <i class="fa-solid fa-terminal"></i>
+            <span>REAL-TIME ENGINE STDOUT / STDERR STREAM</span>
+        </div>
+        <div class="terminal-actions">
+            <button class="terminal-btn" onclick="document.getElementById('terminalStream').textContent = '';">Clear</button>
+            <button class="terminal-btn" onclick="ReconQuest.copyToClipboard(document.getElementById('terminalStream').textContent, 'Terminal Stream')">Copy Output</button>
+            <a id="viewFullResultsLink" href="{{ url_for('routes.scan_history') }}" class="terminal-btn" style="text-decoration: none; color: var(--cyan);">View in History &rarr;</a>
+        </div>
+    </div>
+    <pre class="terminal-body" id="terminalStream">[*] Ready. Select a mission, verify target scope, and click EXECUTE to observe live cybersecurity reconnaissance.
+[!] Notice: No mock or simulated data is used. Real Ubuntu binaries execute safely in isolated subprocesses.</pre>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentSub = "subdomain";
+
+// Tab switcher
+document.querySelectorAll('.sub-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentSub = tab.getAttribute('data-sub');
+        updateInterfaceForTab(currentSub);
+    });
+});
+
+function updateInterfaceForTab(sub) {
+    const title = document.getElementById('reconSectionTitle');
+    const desc = document.getElementById('reconSectionDesc');
+    const toolSelect = document.getElementById('toolSelect');
+    const dynOpt = document.getElementById('dynamicOptions');
+
+    if (sub === "subdomain") {
+        title.innerText = "SUBDOMAIN DISCOVERY MISSION [2]";
+        desc.innerText = "Discover all registered subdomains using passive certificate transparency and search engine sources.";
+        toolSelect.innerHTML = `
+            <option value="subfinder">Subfinder (Passive Fast Enumerator)</option>
+            <option value="amass">OWASP Amass (Deep DNS Correlation)</option>
+            <option value="assetfinder">Assetfinder (Fast Archive)</option>
+        `;
+        dynOpt.innerHTML = "";
+    } else if (sub === "dns") {
+        title.innerText = "DNS INTELLIGENCE PROBE [3]";
+        desc.innerText = "Query DNS resource records (ANY, A, MX, NS, TXT) using the standard dig probe.";
+        toolSelect.innerHTML = `<option value="dig">dig (DNS Utilities)</option>`;
+        dynOpt.innerHTML = `
+            <div class="form-group" style="max-width: 250px;">
+                <label class="form-label">Record Type</label>
+                <select id="dnsRecordType" class="form-control">
+                    <option value="ANY">ANY (All Available Records)</option>
+                    <option value="A">A (IPv4 Addresses)</option>
+                    <option value="AAAA">AAAA (IPv6 Addresses)</option>
+                    <option value="MX">MX (Mail Exchanges)</option>
+                    <option value="NS">NS (Authoritative Nameservers)</option>
+                    <option value="TXT">TXT (SPF, Verification Tokens)</option>
+                </select>
+            </div>
+        `;
+    } else if (sub === "httpx") {
+        title.innerText = "LIVE HOST & SERVICE PROBING [4]";
+        desc.innerText = "Probe discovered hostnames for live web ports (80/443), retrieve status codes, page titles, and tech stacks.";
+        toolSelect.innerHTML = `<option value="httpx">httpx (HTTP Toolkit)</option>`;
+        dynOpt.innerHTML = "";
+    } else if (sub === "nmap") {
+        title.innerText = "PORT AND SERVICE DISCOVERY [5]";
+        desc.innerText = "Scan authorized target IP or hostname to discover open listening ports and version banners.";
+        toolSelect.innerHTML = `<option value="nmap">Nmap Network Scanner</option>`;
+        dynOpt.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label class="form-label">Scan Profile</label>
+                    <select id="nmapProfile" class="form-control">
+                        <option value="default">Default Service Scan (-sV -T3)</option>
+                        <option value="fast">Fast Scan (-F -sV)</option>
+                        <option value="top100">Top 100 Ports Scan</option>
+                        <option value="ping">Host Discovery Only (-sn)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Custom Ports (Optional, e.g. 80,443,8080)</label>
+                    <input type="text" id="nmapPorts" class="form-control" placeholder="Leave empty for profile default">
+                </div>
+            </div>
+        `;
+    } else if (sub === "crawler") {
+        title.innerText = "URL AND ENDPOINT CRAWLING [7]";
+        desc.innerText = "Crawl target endpoints and discover web routes and API paths using Katana.";
+        toolSelect.innerHTML = `<option value="katana">Katana Web Crawler</option>`;
+        dynOpt.innerHTML = "";
+    } else if (sub === "nuclei") {
+        title.innerText = "VULNERABILITY ASSESSMENT [10]";
+        desc.innerText = "Scan authorized web applications against curated community vulnerability templates.";
+        toolSelect.innerHTML = `<option value="nuclei">Nuclei Scanner</option>`;
+        dynOpt.innerHTML = `
+            <div class="form-group" style="max-width: 350px;">
+                <label class="form-label">Severity Filter</label>
+                <select id="nucleiSeverity" class="form-control">
+                    <option value="info,low,medium">Info, Low & Medium (Safe Checks)</option>
+                    <option value="info,low">Informational & Low Only</option>
+                    <option value="medium,high">Medium & High</option>
+                </select>
+            </div>
+        `;
+    }
+    updateToolReadiness();
+}
+
+async function checkScopeQuick() {
+    const target = document.getElementById('targetInput').value.trim();
+    const fb = document.getElementById('scopeFeedback');
+    if (!target) {
+        fb.innerHTML = "<span style='color: var(--amber);'>Please enter a target first.</span>";
+        return;
+    }
+    const res = await ReconQuest.apiCall('/api/scope/check', {
+        method: 'POST',
+        body: JSON.stringify({ target: target })
+    });
+    if (res.in_scope) {
+        fb.innerHTML = `<span style='color: var(--neon-green);'><i class='fa-solid fa-check'></i> In Scope: ${res.message}</span>`;
+    } else {
+        fb.innerHTML = `<span style='color: var(--crimson);'><i class='fa-solid fa-triangle-exclamation'></i> Out of Scope: ${res.message} <a href="{{ url_for('routes.scope_manager') }}" style="color: var(--cyan);">Add to Scope</a></span>`;
+    }
+}
+
+async function updateToolReadiness() {
+    const tool = document.getElementById('toolSelect').value;
+    const badge = document.getElementById('selectedToolBadge');
+    const res = await ReconQuest.apiCall(`/api/tools/status/${tool}`);
+    if (res.success && res.tool.status === 'READY') {
+        badge.innerHTML = `<span class="badge badge-ready"><i class="fa-solid fa-check"></i> ${tool.toUpperCase()} READY (${res.tool.version || 'installed'})</span>`;
+    } else {
+        badge.innerHTML = `<a href="{{ url_for('routes.tool_manager') }}" class="badge badge-missing" style="text-decoration:none;"><i class="fa-solid fa-triangle-exclamation"></i> ${tool.toUpperCase()} MISSING - CLICK TO INSTALL</a>`;
+    }
+}
+
+async function previewCommand() {
+    const target = document.getElementById('targetInput').value.trim();
+    const tool = document.getElementById('toolSelect').value;
+    if (!target) {
+        ReconQuest.showToast("Enter a target first", "warning");
+        return;
+    }
+    const res = await ReconQuest.apiCall('/api/scan/preview', {
+        method: 'POST',
+        body: JSON.stringify({ target, tool, sub: currentSub })
+    });
+    if (res.success) {
+        ReconQuest.showModal(
+            "COMMAND EXECUTION PREVIEW",
+            `<p style="margin-bottom: 12px; color: var(--text-muted);">The following sanitized argument array will be executed without shell interpolation:</p>
+             <pre style="background: #000; padding: 15px; color: var(--neon-green); border-radius: 6px; font-family: var(--font-mono);">${res.command}</pre>
+             <p style="margin-top: 12px; font-size: 13px; color: var(--cyan);">Mode: ${res.is_passive ? 'Passive (Queries public internet archives)' : 'Active (Direct connection to target)'}</p>`
+        );
+    } else {
+        ReconQuest.showToast(res.error, "error");
+    }
+}
+
+async function executeSelectedRecon() {
+    const target = document.getElementById('targetInput').value.trim();
+    const tool = document.getElementById('toolSelect').value;
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    if (!target) {
+        ReconQuest.showToast("Please enter a target", "warning");
+        return;
+    }
+
+    let extraParams = {};
+    if (currentSub === "dns") {
+        extraParams.record_type = document.getElementById('dnsRecordType')?.value || "ANY";
+    } else if (currentSub === "nmap") {
+        extraParams.profile = document.getElementById('nmapProfile')?.value || "default";
+        extraParams.ports = document.getElementById('nmapPorts')?.value || "";
+    } else if (currentSub === "nuclei") {
+        extraParams.severity = document.getElementById('nucleiSeverity')?.value || "info,low,medium";
+    }
+
+    const payload = {
+        target: target,
+        tool: tool,
+        sub: currentSub,
+        params: extraParams
+    };
+
+    ReconQuest.showToast(`Initiating ${tool} scan on ${target}...`, "info");
+    const res = await ReconQuest.apiCall('/api/scan/launch', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    });
+
+    if (res.success) {
+        cancelBtn.style.display = 'inline-flex';
+        ReconQuest.showToast(res.message, "success");
+        ReconQuest.startScanMonitoring(res.job_id);
+    } else {
+        ReconQuest.showToast(res.error, "error");
+    }
+}
+
+// Check initial tool on page load
+document.addEventListener('DOMContentLoaded', () => {
+    updateToolReadiness();
+});
+</script>
+{% endblock %}

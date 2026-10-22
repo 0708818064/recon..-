@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}RECONQUEST - Main Command Hub{% endblock %}
+{% block page_title %}Security Command Center{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="margin-bottom: 28px;">
+    <div class="page-badge">
+        <span class="status-indicator online"></span>
+        AUTHORIZED TESTING ENVIRONMENT &bull; UBUNTU LINUX
+    </div>
+    <h1 style="font-size: 30px; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin-bottom: 6px;">
+        Tactical Mission Selector
+    </h1>
+    <p style="color: var(--text-muted); font-size: 14.5px; max-width: 820px; line-height: 1.6;">
+        Choose an authorized reconnaissance mission below or navigate instantly using keyboard numeric shortcuts <strong>[1]</strong> through <strong>[11]</strong>.
+    </p>
+</div>
+
+<!-- Main Numbered Menu Grid -->
+<div class="grid-cards">
+    <!-- [1] Web Reconnaissance -->
+    <a href="{{ url_for('routes.web_recon') }}" class="cyber-card" data-key="1">
+        <div class="card-num">[1]</div>
+        <i class="fa-solid fa-globe card-icon"></i>
+        <div class="card-title">Web Reconnaissance</div>
+        <div class="card-desc">
+            Passive and active target intelligence: subdomains, live HTTP hosts, open ports, DNS topology, and vulnerability discovery.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">ACCESS MODULE [1]</div>
+    </a>
+
+    <!-- [2] Wi-Fi Security Testing -->
+    <a href="{{ url_for('routes.wifi_security') }}" class="cyber-card" data-key="2">
+        <div class="card-num">[2]</div>
+        <i class="fa-solid fa-wifi card-icon" style="color: var(--cyan);"></i>
+        <div class="card-title">Wi-Fi Security Testing</div>
+        <div class="card-desc">
+            Wireless adapter diagnostics, 802.11 airspace discovery, WPA/WPA2 capture inspection, and Airgeddon/Wifite terminal launchers.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">ACCESS LAB [2]</div>
+    </a>
+
+    <!-- [3] Full Reconnaissance Campaign -->
+    <a href="{{ url_for('routes.web_recon') }}?mode=campaign" class="cyber-card" data-key="3">
+        <div class="card-num">[3]</div>
+        <i class="fa-solid fa-network-wired card-icon" style="color: var(--purple);"></i>
+        <div class="card-title">Full Recon Campaign</div>
+        <div class="card-desc">
+            Chained reconnaissance pipeline: run passive domain discovery &rarr; probe live HTTP ports &rarr; inspect services &rarr; export unified report.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">LAUNCH CAMPAIGN [3]</div>
+    </a>
+
+    <!-- [4] Tool Manager and Installation Center -->
+    <a href="{{ url_for('routes.tool_manager') }}" class="cyber-card" data-key="4">
+        <div class="card-num">[4]</div>
+        <i class="fa-solid fa-wrench card-icon" style="color: var(--amber);"></i>
+        <div class="card-title">Tool Manager & Installation</div>
+        <div class="card-desc">
+            Central registry of all 20+ cybersecurity tools. Real-time installation detection, versioning, verified Ubuntu commands, and verification.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">INSPECT TOOLS [4]</div>
+    </a>
+
+    <!-- [5] Target and Scope Manager -->
+    <a href="{{ url_for('routes.scope_manager') }}" class="cyber-card" data-key="5">
+        <div class="card-num">[5]</div>
+        <i class="fa-solid fa-crosshairs card-icon" style="color: var(--crimson);"></i>
+        <div class="card-title">Target & Scope Manager</div>
+        <div class="card-desc">
+            Define and enforce authorized testing boundaries: authorized domains, IP CIDR ranges, and lab Wi-Fi BSSIDs. Prevents unauthorized scans.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">MANAGE SCOPE [5]</div>
+    </a>
+
+    <!-- [6] Scan History -->
+    <a href="{{ url_for('routes.scan_history') }}" class="cyber-card" data-key="6">
+        <div class="card-num">[6]</div>
+        <i class="fa-solid fa-clock-rotate-left card-icon" style="color: var(--green-700);"></i>
+        <div class="card-title">Scan History</div>
+        <div class="card-desc">
+            Audit logs of all previously executed commands, status, duration, full raw terminal captures, and structured findings.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">VIEW AUDIT [6]</div>
+    </a>
+
+    <!-- [7] Results and Reports -->
+    <a href="{{ url_for('routes.results') }}" class="cyber-card" data-key="7">
+        <div class="card-num">[7]</div>
+        <i class="fa-solid fa-file-invoice card-icon" style="color: var(--cyan);"></i>
+        <div class="card-title">Results & Reports</div>
+        <div class="card-desc">
+            Export assessments into JSON, CSV, and standalone executive HTML security reports ready for client review.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">VIEW REPORTS [7]</div>
+    </a>
+
+    <!-- [8] Learning Center -->
+    <a href="{{ url_for('routes.learning') }}" class="cyber-card" data-key="8">
+        <div class="card-num">[8]</div>
+        <i class="fa-solid fa-graduation-cap card-icon" style="color: var(--green-600);"></i>
+        <div class="card-title">Learning Center</div>
+        <div class="card-desc">
+            Gamified cybersecurity missions with educational briefings covering DNS intelligence, port enumeration, Wi-Fi auditing, and defense.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">ENTER ACADEMY [8]</div>
+    </a>
+
+    <!-- [9] Progress and Achievements -->
+    <a href="{{ url_for('routes.achievements') }}" class="cyber-card" data-key="9">
+        <div class="card-num">[9]</div>
+        <i class="fa-solid fa-trophy card-icon" style="color: #eab308;"></i>
+        <div class="card-title">Progress & Achievements</div>
+        <div class="card-desc">
+            Track operator XP, levels, unlocked badges, tool mastery tiers, and mission completion accolades.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">VIEW PROGRESS [9]</div>
+    </a>
+
+    <!-- [10] System Diagnostics -->
+    <a href="{{ url_for('routes.diagnostics') }}" class="cyber-card" data-key="10">
+        <div class="card-num">[10]</div>
+        <i class="fa-solid fa-microchip card-icon" style="color: var(--cyan);"></i>
+        <div class="card-title">System Diagnostics</div>
+        <div class="card-desc">
+            Ubuntu environment health: check Python, Go compiler, APT repositories, wireless kernel interfaces, and rfkill status.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">RUN DIAGNOSTICS [10]</div>
+    </a>
+
+    <!-- [11] Settings -->
+    <a href="{{ url_for('routes.settings') }}" class="cyber-card" data-key="11">
+        <div class="card-num">[11]</div>
+        <i class="fa-solid fa-sliders card-icon" style="color: var(--text-secondary);"></i>
+        <div class="card-title">Settings & Controls</div>
+        <div class="card-desc">
+            Configure scan execution timeouts, max terminal buffer size, database backup, operator persona, and audit log policies.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">CONFIGURE [11]</div>
+    </a>
+
+    <!-- [0] Exit / Info -->
+    <div class="cyber-card" data-key="0" onclick="ReconQuest.showToast('RECONQUEST local engine is bound to 127.0.0.1. Press Ctrl+C in terminal to stop.', 'info')">
+        <div class="card-num">[0]</div>
+        <i class="fa-solid fa-power-off card-icon" style="color: var(--crimson);"></i>
+        <div class="card-title">Exit / Status</div>
+        <div class="card-desc">
+            Local daemon running safely on localhost. No remote exposure. Press Ctrl+C in your hosting terminal to stop the Flask server.
+        </div>
+        <div class="btn btn-secondary" style="margin-top: auto;">SHUTDOWN INFO [0]</div>
+    </div>
+</div>
+{% endblock %}

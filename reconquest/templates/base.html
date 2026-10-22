@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+    <title>{% block title %}RECONQUEST - Cybersecurity Reconnaissance{% endblock %}</title>
+
+    <!-- Google Fonts: Inter & JetBrains Mono for enterprise grade UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- RECONQUEST Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <i class="fa-solid fa-shield-halved brand-icon"></i>
+                    <span class="brand-text">RECON<span>QUEST</span></span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="operator-profile">
+                <div class="avatar-box">
+                    <i class="fa-solid fa-user-astronaut"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="operator-name">{{ user.username if user else 'Operator' }}</span>
+                    <span class="operator-rank">LVL <strong id="userLevel">{{ user.level if user else 1 }}</strong> AGENT</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="menu-label">CORE COMMANDS</div>
+                <a href="{{ url_for('routes.dashboard') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                    <span class="nav-key">[0]</span>
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span class="nav-text">Command Dashboard</span>
+                </a>
+                <a href="{{ url_for('routes.web_recon') }}" class="nav-item {% if active_page == 'web_recon' %}active{% endif %}">
+                    <span class="nav-key">[1]</span>
+                    <i class="fa-solid fa-globe"></i>
+                    <span class="nav-text">Web Reconnaissance</span>
+                </a>
+                <a href="{{ url_for('routes.wifi_security') }}" class="nav-item {% if active_page == 'wifi_security' %}active{% endif %}">
+                    <span class="nav-key">[2]</span>
+                    <i class="fa-solid fa-wifi"></i>
+                    <span class="nav-text">Wi-Fi Security Lab</span>
+                </a>
+                <a href="{{ url_for('routes.tool_manager') }}" class="nav-item {% if active_page == 'tool_manager' %}active{% endif %}">
+                    <span class="nav-key">[4]</span>
+                    <i class="fa-solid fa-wrench"></i>
+                    <span class="nav-text">Tool Installation</span>
+                </a>
+                <a href="{{ url_for('routes.scope_manager') }}" class="nav-item {% if active_page == 'scope_manager' %}active{% endif %}">
+                    <span class="nav-key">[5]</span>
+                    <i class="fa-solid fa-crosshairs"></i>
+                    <span class="nav-text">Scope & Targets</span>
+                </a>
+
+                <div class="menu-label">INTEL & ASSESSMENT</div>
+                <a href="{{ url_for('routes.scan_history') }}" class="nav-item {% if active_page == 'scan_history' %}active{% endif %}">
+                    <span class="nav-key">[6]</span>
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span class="nav-text">Scan History</span>
+                </a>
+                <a href="{{ url_for('routes.learning') }}" class="nav-item {% if active_page == 'learning' %}active{% endif %}">
+                    <span class="nav-key">[8]</span>
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span class="nav-text">Learning Missions</span>
+                </a>
+                <a href="{{ url_for('routes.achievements') }}" class="nav-item {% if active_page == 'achievements' %}active{% endif %}">
+                    <span class="nav-key">[9]</span>
+                    <i class="fa-solid fa-trophy"></i>
+                    <span class="nav-text">Achievements</span>
+                </a>
+                <a href="{{ url_for('routes.diagnostics') }}" class="nav-item {% if active_page == 'diagnostics' %}active{% endif %}">
+                    <span class="nav-key">[10]</span>
+                    <i class="fa-solid fa-microchip"></i>
+                    <span class="nav-text">System Diagnostics</span>
+                </a>
+                <a href="{{ url_for('routes.settings') }}" class="nav-item {% if active_page == 'settings' %}active{% endif %}">
+                    <span class="nav-key">[11]</span>
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-indicator online"></span>
+                    <span>UBUNTU LOCAL ENGINE</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Topbar Header -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <div class="breadcrumb">
+                        <span class="system-name">RECONQUEST</span>
+                        <span class="divider">/</span>
+                        <span class="current-section">{% block page_title %}Security Command{% endblock %}</span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- Gamification XP Bar -->
+                    <div class="xp-container">
+                        <div class="xp-label">
+                            <span>LEVEL <strong id="barLevel">{{ user.level if user else 1 }}</strong></span>
+                            <span id="userXpText">{{ user.xp_points if user else 0 }} XP</span>
+                        </div>
+                        <div class="xp-bar-bg">
+                            <div class="xp-bar-fill" id="xpBarFill" style="width: {{ ((user.xp_points if user else 0) % 100) }}%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="active-badge" id="activeBadge" style="display: none;">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        <span>ACTIVE SCAN</span>
+                    </div>
+
+                    <div class="keyboard-legend-btn" title="Press numbers [1] through [11] for instant navigation">
+                        <i class="fa-solid fa-keyboard"></i>
+                        <span>KEYBOARD ACTIVE</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Alerts Container -->
+            <div id="toastContainer" class="toast-container"></div>
+
+            <!-- Page Content Body -->
+            <div class="content-body">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Global Confirmation / Command Preview Modal -->
+    <div id="cyberModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">SECURITY CONFIRMATION</div>
+                <button class="modal-close" onclick="ReconQuest.closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Injected via JS -->
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <button class="btn btn-secondary" onclick="ReconQuest.closeModal()">[ESC] CANCEL</button>
+                <button class="btn btn-primary" id="modalConfirmBtn">[ENTER] CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}RECONQUEST - Target & Scope Manager{% endblock %}
+{% block page_title %}Scope & Target Boundary Enforcement{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+    <div>
+        <div style="font-family: var(--font-mono); color: var(--crimson); font-size: 13px; letter-spacing: 2px;">
+            LEGAL ROE // AUTHORIZED BOUNDARIES
+        </div>
+        <h1 style="font-size: 28px; font-weight: 700; color: var(--text-main); margin-top: 5px;">
+            TARGET SCOPE & RULES OF ENGAGEMENT
+        </h1>
+        <p style="color: var(--text-muted); font-size: 14px; max-width: 800px; margin-top: 6px;">
+            Define authorized domains, IP CIDR blocks, and lab Wi-Fi BSSIDs. RECONQUEST enforces these boundaries to strictly prevent unauthorized or out-of-scope testing.
+        </p>
+    </div>
+    <a href="{{ url_for('routes.dashboard') }}" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> [0] DASHBOARD
+    </a>
+</div>
+
+<!-- Add Target Card -->
+<div class="cyber-card" style="margin-bottom: 25px;">
+    <h3 style="color: var(--text-main); font-size: 18px; margin-bottom: 15px;">
+        <i class="fa-solid fa-plus" style="color: var(--neon-green);"></i> AUTHORIZE NEW TARGET SCOPE
+    </h3>
+    <form id="scopeForm" onsubmit="event.preventDefault(); addTargetScope();">
+        <div style="display: grid; grid-template-columns: 1fr 2fr 1.5fr auto; gap: 15px; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Target Type</label>
+                <select id="scopeTargetType" class="form-control">
+                    <option value="domain">Domain (e.g. example.com)</option>
+                    <option value="ip">Single IP (e.g. 192.168.1.1)</option>
+                    <option value="cidr">IP CIDR (e.g. 10.0.0.0/24)</option>
+                    <option value="wifi_bssid">Wi-Fi AP BSSID (e.g. 00:11:22:33:44:55)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Target Value</label>
+                <input type="text" id="scopeTargetValue" class="form-control" placeholder="example.com or scanme.nmap.org" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Authorization Notes / Authority</label>
+                <input type="text" id="scopeNotes" class="form-control" placeholder="Lab Authorization #1234">
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 45px;">
+                <i class="fa-solid fa-shield-halved"></i> ADD TO SCOPE
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Scope Table -->
+<div class="cyber-table-container">
+    <table class="cyber-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Target Type</th>
+                <th>Authorized Target Value</th>
+                <th>Status</th>
+                <th>Authorized By</th>
+                <th>Added Timestamp</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for target in targets %}
+            <tr>
+                <td><code>#{{ target.id }}</code></td>
+                <td>
+                    <span style="font-family: var(--font-mono); font-size: 12px; color: var(--cyan); text-transform: uppercase;">
+                        {{ target.target_type }}
+                    </span>
+                </td>
+                <td>
+                    <strong style="color: var(--text-main); font-size: 15px;">{{ target.value }}</strong>
+                    {% if target.notes %}<div style="color: var(--text-muted); font-size: 12px;">{{ target.notes }}</div>{% endif %}
+                </td>
+                <td>
+                    <span class="badge badge-ready"><i class="fa-solid fa-check"></i> IN SCOPE</span>
+                </td>
+                <td>{{ target.authorized_by }}</td>
+                <td style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">
+                    {{ target.added_at.strftime('%Y-%m-%d %H:%M') if target.added_at else '—' }}
+                </td>
+                <td>
+                    <button class="btn btn-danger" style="padding: 4px 10px; font-size: 12px;" onclick="removeTarget({{ target.id }})">
+                        <i class="fa-solid fa-trash"></i> Remove
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    No targets defined in scope yet. Add your authorized target domain or IP above before launching scans.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function addTargetScope() {
+    const type = document.getElementById('scopeTargetType').value;
+    const value = document.getElementById('scopeTargetValue').value.trim();
+    const notes = document.getElementById('scopeNotes').value.trim();
+
+    if (!value) {
+        ReconQuest.showToast("Target value cannot be empty", "warning");
+        return;
+    }
+
+    const res = await ReconQuest.apiCall('/api/scope/add', {
+        method: 'POST',
+        body: JSON.stringify({ target_type: type, value: value, notes: notes })
+    });
+
+    if (res.success) {
+        ReconQuest.showToast(res.message, "success");
+        setTimeout(() => location.reload(), 800);
+    } else {
+        ReconQuest.showToast(res.error, "error");
+    }
+}
+
+async function removeTarget(id) {
+    ReconQuest.showModal(
+        "REVOKE TARGET AUTHORIZATION",
+        `<p style="color: var(--text-muted);">Are you sure you want to remove target #${id} from the active scope?</p>`,
+        async () => {
+            const res = await ReconQuest.apiCall(`/api/scope/remove/${id}`, { method: 'POST' });
+            if (res.success) {
+                ReconQuest.showToast("Target removed from scope", "info");
+                setTimeout(() => location.reload(), 600);
+            } else {
+                ReconQuest.showToast(res.error, "error");
+            }
+        }
+    );
+}
+</script>
+{% endblock %}

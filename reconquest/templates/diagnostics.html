@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}RECONQUEST - System Diagnostics{% endblock %}
+{% block page_title %}System Health & Environment Diagnostics{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+    <div>
+        <div style="font-family: var(--font-mono); color: var(--cyan); font-size: 13px; letter-spacing: 2px;">
+            ENVIRONMENT // HOST READINESS
+        </div>
+        <h1 style="font-size: 28px; font-weight: 700; color: var(--text-main); margin-top: 5px;">
+            UBUNTU SYSTEM DIAGNOSTICS [10]
+        </h1>
+        <p style="color: var(--text-muted); font-size: 14px; max-width: 800px; margin-top: 6px;">
+            Verifies local development and runtime toolchains required to compile, install, or run cybersecurity utilities.
+        </p>
+    </div>
+    <a href="{{ url_for('routes.dashboard') }}" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> [0] DASHBOARD
+    </a>
+</div>
+
+<!-- Diagnostics Grid -->
+<div class="grid-cards">
+    <!-- Go Runtime -->
+    <div class="cyber-card">
+        <div class="card-title"><i class="fa-brands fa-golang" style="color: var(--cyan);"></i> Go Compiler</div>
+        <div class="card-desc">
+            Required to build ProjectDiscovery tools (subfinder, httpx, nuclei, katana) and Amass.
+        </div>
+        <div style="margin-top: auto;">
+            {% if env.go.available %}
+                <span class="badge badge-ready"><i class="fa-solid fa-check"></i> INSTALLED</span>
+                <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                    {{ env.go.version }}
+                </div>
+            {% else %}
+                <span class="badge badge-missing"><i class="fa-solid fa-xmark"></i> NOT DETECTED</span>
+                <div style="font-size: 12px; color: var(--amber); margin-top: 6px;">
+                    Install: <code>sudo apt install golang-go</code>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Git -->
+    <div class="cyber-card">
+        <div class="card-title"><i class="fa-brands fa-git-alt" style="color: #f05032;"></i> Git Version Control</div>
+        <div class="card-desc">
+            Required for cloning Airgeddon and Wifite repositories.
+        </div>
+        <div style="margin-top: auto;">
+            {% if env.git.available %}
+                <span class="badge badge-ready"><i class="fa-solid fa-check"></i> INSTALLED</span>
+                <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                    {{ env.git.version }}
+                </div>
+            {% else %}
+                <span class="badge badge-missing">NOT DETECTED</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Python 3 & Pipx -->
+    <div class="cyber-card">
+        <div class="card-title"><i class="fa-brands fa-python" style="color: #ffd700;"></i> Python 3 Runtime</div>
+        <div class="card-desc">
+            Core environment executing RECONQUEST and Wifite.
+        </div>
+        <div style="margin-top: auto;">
+            <span class="badge badge-ready"><i class="fa-solid fa-check"></i> INSTALLED</span>
+            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                {{ env.python3.version }}
+            </div>
+        </div>
+    </div>
+
+    <!-- APT Package Manager -->
+    <div class="cyber-card">
+        <div class="card-title"><i class="fa-brands fa-ubuntu" style="color: #e95420;"></i> APT Package Manager</div>
+        <div class="card-desc">
+            Native Debian/Ubuntu package management utility.
+        </div>
+        <div style="margin-top: auto;">
+            {% if env.apt.available %}
+                <span class="badge badge-ready"><i class="fa-solid fa-check"></i> AVAILABLE</span>
+                <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                    {{ env.apt.path }}
+                </div>
+            {% else %}
+                <span class="badge badge-missing">NOT FOUND</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

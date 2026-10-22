@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}RECONQUEST - Progress & Achievements{% endblock %}
+{% block page_title %}Operator Progress & Accolades{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+    <div>
+        <div style="font-family: var(--font-mono); color: #ffd700; font-size: 13px; letter-spacing: 2px;">
+            OPERATOR DOSSIER // RECOGNITION
+        </div>
+        <h1 style="font-size: 28px; font-weight: 700; color: var(--text-main); margin-top: 5px;">
+            PROGRESSION, RANKS & ACHIEVEMENTS
+        </h1>
+        <p style="color: var(--text-muted); font-size: 14px; max-width: 800px; margin-top: 6px;">
+            Earn XP for safe tool verification, target scoping, passive reconnaissance, and structured security assessment.
+        </p>
+    </div>
+    <a href="{{ url_for('routes.dashboard') }}" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> [0] DASHBOARD
+    </a>
+</div>
+
+<!-- Operator Stats Header -->
+<div class="cyber-card" style="margin-bottom: 25px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="width: 70px; height: 70px; border-radius: 8px; background: var(--bg-card-sub); border: 2px solid var(--neon-green); border: 2px solid var(--neon-green); display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--neon-green); box-shadow: var(--glow-green);">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div>
+                <div style="font-family: var(--font-mono); font-size: 12px; color: var(--cyan);">AGENT CALLSIGN</div>
+                <h2 style="color: var(--text-main); font-size: 24px;">{{ user.username }}</h2>
+                <div style="color: var(--text-muted); font-size: 13px;">Rank: Tier {{ user.level }} Reconnaissance Specialist</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 25px;">
+            <div style="text-align: right;">
+                <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">CURRENT XP</div>
+                <div style="font-size: 26px; font-weight: bold; color: var(--neon-green);">{{ user.xp_points }} XP</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">LEVEL PROGRESS</div>
+                <div style="font-size: 26px; font-weight: bold; color: var(--cyan);">{{ (user.xp_points % 100) }} / 100</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Achievements Badges Grid -->
+<div class="grid-cards">
+    {% for ach in achievements %}
+    {% set is_unlocked = ach.id in unlocked_ids %}
+    <div class="cyber-card" style="{{ 'border-color: #ffd700; background: var(--bg-card-sub);' if is_unlocked else 'opacity: 0.65;' }}">
+        <div class="card-num">+{{ ach.xp_reward }} XP</div>
+        <div style="font-size: 36px; margin-bottom: 12px; color: {{ '#ffd700' if is_unlocked else 'var(--text-dim)' }};">
+            <i class="fa-solid fa-{{ ach.icon }}"></i>
+        </div>
+        <div class="card-title">{{ ach.name }}</div>
+        <div class="card-desc">{{ ach.description }}</div>
+        <div>
+            {% if is_unlocked %}
+                <span class="badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; border: 1px solid #ffd700;">
+                    <i class="fa-solid fa-check-double"></i> UNLOCKED
+                </span>
+            {% else %}
+                <span class="badge" style="background: #111827; color: var(--text-muted); border: 1px solid var(--border-color);">
+                    <i class="fa-solid fa-lock"></i> LOCKED
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
